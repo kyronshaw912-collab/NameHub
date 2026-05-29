@@ -1,0 +1,29 @@
+---
+description: Auto-commit and auto-push every file change in this repo
+alwaysApply: true
+---
+
+# Auto-Push Policy
+
+This repo is served live via GitHub raw URLs that Roblox executors fetch
+directly. Every change must reach GitHub immediately or users won't see it.
+
+After making **any** file change in this workspace:
+
+1. Stage the changed files (`git add <paths>` or `git add -A` if appropriate).
+2. Commit with a short, human-readable message that explains the *why*.
+   If the change is behavior-affecting, also bump the build/version string
+   in the file header so the NameHub Discord auto-update embed shows it.
+3. `git push origin main` immediately.
+
+The GitHub token is cached in Windows Credential Manager, so pushes are
+silent. If a push fails (auth / conflict / network), stop and report it -
+never leave changes unpushed and unreported.
+
+## Hard rules
+
+- Do not amend or force-push without explicit user confirmation.
+- Do not push to branches other than `main`.
+- Do not skip the commit step (no piling up uncommitted changes).
+- If a change is incomplete/experimental and should NOT be published yet,
+  ask the user first instead of pushing.
