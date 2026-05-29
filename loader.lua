@@ -1,29 +1,26 @@
 -- ============================================================================
---  NameHub Loader  (universal dispatcher)
+--  NameHub Loader  (universal dispatcher + branded loading screen)
 --  Detects the current Roblox game via game.PlaceId and loads the matching
---  framework script. Forwards the `key` global into getgenv().NAMEHUB_KEY so
---  downstream scripts (or future key validation) can read it.
---
---  Source of truth lives in the NameHub Discord bot's config -- update it
---  there if you ever change branches, paths, or supported PlaceIds.
+--  framework script. Shows a NameHub-branded loading splash (1% -> 100%)
+--  while the framework downloads.
 -- ============================================================================
 
 if type(key) == "string" and getgenv then
     getgenv().NAMEHUB_KEY = key
 end
 
-local URLS = {
-    [228181322]   = "https://raw.githubusercontent.com/kyronshaw912-collab/DinoFramework/main/DinoFramework.lua",
-    [161541423]   = "https://raw.githubusercontent.com/kyronshaw912-collab/DinoFramework/main/DinoFramework.lua",
-    [11653088948] = "https://raw.githubusercontent.com/kyronshaw912-collab/JurassicBlockyFramework/main/JurassicBlockyFramework.lua",
+local TARGETS = {
+    [228181322]   = { url = "https://raw.githubusercontent.com/kyronshaw912-collab/DinoFramework/main/DinoFramework.lua",                           name = "Dinosaur Simulator" },
+    [161541423]   = { url = "https://raw.githubusercontent.com/kyronshaw912-collab/DinoFramework/main/DinoFramework.lua",                           name = "Dinosaur Simulator" },
+    [11653088948] = { url = "https://raw.githubusercontent.com/kyronshaw912-collab/JurassicBlockyFramework/main/JurassicBlockyFramework.lua",       name = "Jurassic Blocky" },
 }
 
 local LABELS = "Dinosaur Simulator, Jurassic Blocky"
 
-local pid = game.PlaceId
-local url = URLS[pid]
+local pid    = game.PlaceId
+local target = TARGETS[pid]
 
-if not url then
+if not target then
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title    = "NameHub",
@@ -34,14 +31,175 @@ if not url then
     return error(("[NameHub] No script for this game (PlaceId=%d). Supported: %s."):format(pid, LABELS), 0)
 end
 
-local ok, src = pcall(game.HttpGet, game, url)
-if not ok or type(src) ~= "string" or #src < 200 then
+-- ============================================================================
+--  Branded loading splash
+--    Runs its own animation on a separate task. The loader's fetch + compile
+--    + fn() run in parallel on the main thread; the splash fades itself out
+--    when its 1% -> 100% animation completes (~2.0 s) regardless of where
+--    the framework is in its boot, so the UX is consistent on fast and slow
+--    networks.
+-- ============================================================================
+local dismissSplash = (function()
+    local ok, dismiss = pcall(function()
+        local CoreGui       = game:GetService("CoreGui")
+        local TweenService  = game:GetService("TweenService")
+        local Players       = game:GetService("Players")
+
+        local BRAND_COLOR = Color3.fromRGB( 34, 197,  94)  -- NameHub green (#22c55e)
+        local BG_COLOR    = Color3.fromRGB( 10,  12,  16)
+        local CARD_COLOR  = Color3.fromRGB( 18,  22,  28)
+        local TEXT_DIM    = Color3.fromRGB(160, 168, 178)
+        local TRACK_COLOR = Color3.fromRGB( 40,  46,  54)
+
+        local gui = Instance.new("ScreenGui")
+        gui.Name              = "_NH_" .. tostring(math.random(100000, 999999))
+        gui.IgnoreGuiInset    = true
+        gui.ResetOnSpawn      = false
+        gui.ZIndexBehavior    = Enum.ZIndexBehavior.Global
+        gui.DisplayOrder      = 2147483647
+
+        local parented = pcall(function() gui.Parent = CoreGui end)
+        if not parented then
+            local lp = Players.LocalPlayer
+            local pg = lp and (lp:FindFirstChild("PlayerGui") or lp:WaitForChild("PlayerGui", 5))
+            if not pg then return function() end end
+            gui.Parent = pg
+        end
+
+        local backdrop = Instance.new("Frame")
+        backdrop.Size                  = UDim2.fromScale(1, 1)
+        backdrop.BackgroundColor3      = BG_COLOR
+        backdrop.BackgroundTransparency = 0.05
+        backdrop.BorderSizePixel       = 0
+        backdrop.Parent                = gui
+
+        local card = Instance.new("Frame")
+        card.AnchorPoint        = Vector2.new(0.5, 0.5)
+        card.Position           = UDim2.fromScale(0.5, 0.5)
+        card.Size               = UDim2.fromOffset(380, 170)
+        card.BackgroundColor3   = CARD_COLOR
+        card.BorderSizePixel    = 0
+        card.Parent             = backdrop
+
+        local cardCorner = Instance.new("UICorner")
+        cardCorner.CornerRadius = UDim.new(0, 12)
+        cardCorner.Parent       = card
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Color        = BRAND_COLOR
+        stroke.Transparency = 0.55
+        stroke.Thickness    = 1
+        stroke.Parent       = card
+
+        local title = Instance.new("TextLabel")
+        title.Size                  = UDim2.new(1, -40, 0, 34)
+        title.Position              = UDim2.fromOffset(20, 22)
+        title.BackgroundTransparency = 1
+        title.Text                  = "NameHub"
+        title.Font                  = Enum.Font.GothamBold
+        title.TextSize              = 28
+        title.TextColor3            = BRAND_COLOR
+        title.TextXAlignment        = Enum.TextXAlignment.Left
+        title.Parent                = card
+
+        local subtitle = Instance.new("TextLabel")
+        subtitle.Size                  = UDim2.new(1, -40, 0, 18)
+        subtitle.Position              = UDim2.fromOffset(20, 58)
+        subtitle.BackgroundTransparency = 1
+        subtitle.Text                  = target.name
+        subtitle.Font                  = Enum.Font.Gotham
+        subtitle.TextSize              = 13
+        subtitle.TextColor3            = TEXT_DIM
+        subtitle.TextXAlignment        = Enum.TextXAlignment.Left
+        subtitle.Parent                = card
+
+        local barBg = Instance.new("Frame")
+        barBg.Size              = UDim2.new(1, -40, 0, 6)
+        barBg.Position          = UDim2.new(0, 20, 0, 105)
+        barBg.BackgroundColor3  = TRACK_COLOR
+        barBg.BorderSizePixel   = 0
+        barBg.Parent            = card
+        local barBgCorner = Instance.new("UICorner")
+        barBgCorner.CornerRadius = UDim.new(1, 0)
+        barBgCorner.Parent       = barBg
+
+        local bar = Instance.new("Frame")
+        bar.Size              = UDim2.new(0.01, 0, 1, 0)
+        bar.BackgroundColor3  = BRAND_COLOR
+        bar.BorderSizePixel   = 0
+        bar.Parent            = barBg
+        local barCorner = Instance.new("UICorner")
+        barCorner.CornerRadius = UDim.new(1, 0)
+        barCorner.Parent       = bar
+
+        local pct = Instance.new("TextLabel")
+        pct.Size                  = UDim2.new(0, 60, 0, 16)
+        pct.Position              = UDim2.new(0, 20, 0, 122)
+        pct.BackgroundTransparency = 1
+        pct.Text                  = "1%"
+        pct.Font                  = Enum.Font.GothamMedium
+        pct.TextSize              = 12
+        pct.TextColor3            = TEXT_DIM
+        pct.TextXAlignment        = Enum.TextXAlignment.Left
+        pct.Parent                = card
+
+        local status = Instance.new("TextLabel")
+        status.Size                  = UDim2.new(1, -90, 0, 16)
+        status.Position              = UDim2.new(0, 70, 0, 122)
+        status.BackgroundTransparency = 1
+        status.Text                  = "Loading framework..."
+        status.Font                  = Enum.Font.Gotham
+        status.TextSize              = 12
+        status.TextColor3            = TEXT_DIM
+        status.TextXAlignment        = Enum.TextXAlignment.Right
+        status.Parent                = card
+
+        local closed = false
+        task.spawn(function()
+            local duration = 2.0
+            local start    = tick()
+            while not closed do
+                local t = math.min((tick() - start) / duration, 1)
+                pct.Text  = math.floor(1 + t * 99 + 0.5) .. "%"
+                bar.Size  = UDim2.new(t, 0, 1, 0)
+                if t >= 1 then break end
+                task.wait()
+            end
+            if not closed then
+                status.Text = "Ready"
+                task.wait(0.25)
+            end
+            local ti = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            for _, inst in ipairs({ backdrop, card, bar, barBg }) do
+                TweenService:Create(inst, ti, { BackgroundTransparency = 1 }):Play()
+            end
+            for _, inst in ipairs({ title, subtitle, pct, status }) do
+                TweenService:Create(inst, ti, { TextTransparency = 1 }):Play()
+            end
+            TweenService:Create(stroke, ti, { Transparency = 1 }):Play()
+            task.wait(0.4)
+            gui:Destroy()
+        end)
+
+        return function() closed = true end
+    end)
+    if ok and type(dismiss) == "function" then return dismiss end
+    return function() end
+end)()
+
+-- ============================================================================
+--  Fetch + run framework
+-- ============================================================================
+local fetched, src = pcall(game.HttpGet, game, target.url)
+if not fetched or type(src) ~= "string" or #src < 200 then
+    pcall(dismissSplash)
     return error("[NameHub] Failed to download script. Check your executor's HTTP permissions.", 0)
 end
 
-local fn, err = loadstring(src)
+local fn, compileErr = loadstring(src)
 if not fn then
-    return error("[NameHub] Loader compile error: " .. tostring(err), 0)
+    pcall(dismissSplash)
+    return error("[NameHub] Loader compile error: " .. tostring(compileErr), 0)
 end
 
 return fn()
