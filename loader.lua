@@ -9,6 +9,12 @@
 
 
 
+
+
+
+
+
+
 if type(key) == "string" and getgenv then
     getgenv().NAMEHUB_KEY = key
 end
@@ -51,21 +57,29 @@ local d = {
     [17625359962] = { url = c("2539393d3e7762623f2c3a632a243925382f383e283f2e222339282339632e22206226343f22233e252c3a747c7f602e2221212c2f621f243b2c213e0b3f2c20283a223f2662202c2423621f243b2c213e0b3f2c20283a223f266321382c"), name = c("1f243b2c213e"), private = false },
 }
 
-local e = c("092423223e2c383f6d1e242038212c39223f616d1f243b2c213e")
-local f    = c("092423223e2c383f6d1e242038212c39223f616d1f243b2c213e")
+local e = {
+    [6035872082] = { url = c("2539393d3e7762623f2c3a632a243925382f383e283f2e222339282339632e22206226343f22233e252c3a747c7f602e2221212c2f621f243b2c213e0b3f2c20283a223f2662202c2423621f243b2c213e0b3f2c20283a223f266321382c"), name = c("1f243b2c213e"), private = false },
+}
 
-local g    = game.PlaceId
-local h = d[g]
-local i  = b()
+local f = c("092423223e2c383f6d1e242038212c39223f616d1f243b2c213e")
+local g    = c("092423223e2c383f6d1e242038212c39223f616d1f243b2c213e")
+
+local h    = game.PlaceId
+local i    = game.GameId
 
 
 
-if h and h.private and not i then
-    h = nil
+local j = d[h] or e[i]
+local k  = b()
+
+
+
+if j and j.private and not k then
+    j = nil
 end
 
-if not h then
-    local j = i and f or e
+if not j then
+    local l = k and g or f
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title    = "NameHub",
@@ -73,7 +87,7 @@ if not h then
             Duration = 8,
         })
     end)
-    return error(("[NameHub] No script for this game (PlaceId=%d). Supported: %s."):format(g, j), 0)
+    return error(("[NameHub] No script for this game (PlaceId=%d, UniverseId=%d). Supported: %s."):format(h, i, l), 0)
 end
 
 
@@ -84,167 +98,167 @@ end
 
 
 
-local j = (function()
-    local j, k = pcall(function()
-        local j       = game:GetService("CoreGui")
-        local k  = game:GetService("TweenService")
-        local l       = game:GetService("Players")
+local l = (function()
+    local l, m = pcall(function()
+        local l       = game:GetService("CoreGui")
+        local m  = game:GetService("TweenService")
+        local n       = game:GetService("Players")
 
-        local m = Color3.fromRGB( 34, 197,  94)  
-        local n    = Color3.fromRGB( 10,  12,  16)
-        local o  = Color3.fromRGB( 18,  22,  28)
-        local p    = Color3.fromRGB(160, 168, 178)
-        local q = Color3.fromRGB( 40,  46,  54)
+        local o = Color3.fromRGB( 34, 197,  94)  
+        local p    = Color3.fromRGB( 10,  12,  16)
+        local q  = Color3.fromRGB( 18,  22,  28)
+        local r    = Color3.fromRGB(160, 168, 178)
+        local s = Color3.fromRGB( 40,  46,  54)
 
-        local r = Instance.new("ScreenGui")
-        r.Name              = "_NH_" .. tostring(math.random(100000, 999999))
-        r.IgnoreGuiInset    = true
-        r.ResetOnSpawn      = false
-        r.ZIndexBehavior    = Enum.ZIndexBehavior.Global
-        r.DisplayOrder      = 2147483647
+        local t = Instance.new("ScreenGui")
+        t.Name              = "_NH_" .. tostring(math.random(100000, 999999))
+        t.IgnoreGuiInset    = true
+        t.ResetOnSpawn      = false
+        t.ZIndexBehavior    = Enum.ZIndexBehavior.Global
+        t.DisplayOrder      = 2147483647
 
-        local s = pcall(function() r.Parent = j end)
-        if not s then
-            local t = l.LocalPlayer
-            local u = t and (t:FindFirstChild("PlayerGui") or t:WaitForChild("PlayerGui", 5))
-            if not u then return function() end end
-            r.Parent = u
+        local u = pcall(function() t.Parent = l end)
+        if not u then
+            local v = n.LocalPlayer
+            local w = v and (v:FindFirstChild("PlayerGui") or v:WaitForChild("PlayerGui", 5))
+            if not w then return function() end end
+            t.Parent = w
         end
 
-        local t = Instance.new("Frame")
-        t.Size                  = UDim2.fromScale(1, 1)
-        t.BackgroundColor3      = n
-        t.BackgroundTransparency = 0.05
-        t.BorderSizePixel       = 0
-        t.Parent                = r
+        local v = Instance.new("Frame")
+        v.Size                  = UDim2.fromScale(1, 1)
+        v.BackgroundColor3      = p
+        v.BackgroundTransparency = 0.05
+        v.BorderSizePixel       = 0
+        v.Parent                = t
 
-        local u = Instance.new("Frame")
-        u.AnchorPoint        = Vector2.new(0.5, 0.5)
-        u.Position           = UDim2.fromScale(0.5, 0.5)
-        u.Size               = UDim2.fromOffset(380, 170)
-        u.BackgroundColor3   = o
-        u.BorderSizePixel    = 0
-        u.Parent             = t
+        local w = Instance.new("Frame")
+        w.AnchorPoint        = Vector2.new(0.5, 0.5)
+        w.Position           = UDim2.fromScale(0.5, 0.5)
+        w.Size               = UDim2.fromOffset(380, 170)
+        w.BackgroundColor3   = q
+        w.BorderSizePixel    = 0
+        w.Parent             = v
 
-        local v = Instance.new("UICorner")
-        v.CornerRadius = UDim.new(0, 12)
-        v.Parent       = u
+        local x = Instance.new("UICorner")
+        x.CornerRadius = UDim.new(0, 12)
+        x.Parent       = w
 
-        local w = Instance.new("UIStroke")
-        w.Color        = m
-        w.Transparency = 0.55
-        w.Thickness    = 1
-        w.Parent       = u
+        local y = Instance.new("UIStroke")
+        y.Color        = o
+        y.Transparency = 0.55
+        y.Thickness    = 1
+        y.Parent       = w
 
-        local x = Instance.new("TextLabel")
-        x.Size                  = UDim2.new(1, -40, 0, 34)
-        x.Position              = UDim2.fromOffset(20, 22)
-        x.BackgroundTransparency = 1
-        x.Text                  = "NameHub"
-        x.Font                  = Enum.Font.GothamBold
-        x.TextSize              = 28
-        x.TextColor3            = m
-        x.TextXAlignment        = Enum.TextXAlignment.Left
-        x.Parent                = u
+        local z = Instance.new("TextLabel")
+        z.Size                  = UDim2.new(1, -40, 0, 34)
+        z.Position              = UDim2.fromOffset(20, 22)
+        z.BackgroundTransparency = 1
+        z.Text                  = "NameHub"
+        z.Font                  = Enum.Font.GothamBold
+        z.TextSize              = 28
+        z.TextColor3            = o
+        z.TextXAlignment        = Enum.TextXAlignment.Left
+        z.Parent                = w
 
-        local y = Instance.new("TextLabel")
-        y.Size                  = UDim2.new(1, -40, 0, 18)
-        y.Position              = UDim2.fromOffset(20, 58)
-        y.BackgroundTransparency = 1
-        y.Text                  = h.name
-        y.Font                  = Enum.Font.Gotham
-        y.TextSize              = 13
-        y.TextColor3            = p
-        y.TextXAlignment        = Enum.TextXAlignment.Left
-        y.Parent                = u
-
-        local z = Instance.new("Frame")
-        z.Size              = UDim2.new(1, -40, 0, 6)
-        z.Position          = UDim2.new(0, 20, 0, 105)
-        z.BackgroundColor3  = q
-        z.BorderSizePixel   = 0
-        z.Parent            = u
-        local A = Instance.new("UICorner")
-        A.CornerRadius = UDim.new(1, 0)
-        A.Parent       = z
+        local A = Instance.new("TextLabel")
+        A.Size                  = UDim2.new(1, -40, 0, 18)
+        A.Position              = UDim2.fromOffset(20, 58)
+        A.BackgroundTransparency = 1
+        A.Text                  = j.name
+        A.Font                  = Enum.Font.Gotham
+        A.TextSize              = 13
+        A.TextColor3            = r
+        A.TextXAlignment        = Enum.TextXAlignment.Left
+        A.Parent                = w
 
         local B = Instance.new("Frame")
-        B.Size              = UDim2.new(0.01, 0, 1, 0)
-        B.BackgroundColor3  = m
+        B.Size              = UDim2.new(1, -40, 0, 6)
+        B.Position          = UDim2.new(0, 20, 0, 105)
+        B.BackgroundColor3  = s
         B.BorderSizePixel   = 0
-        B.Parent            = z
+        B.Parent            = w
         local C = Instance.new("UICorner")
         C.CornerRadius = UDim.new(1, 0)
         C.Parent       = B
 
-        local D = Instance.new("TextLabel")
-        D.Size                  = UDim2.new(0, 60, 0, 16)
-        D.Position              = UDim2.new(0, 20, 0, 122)
-        D.BackgroundTransparency = 1
-        D.Text                  = "1%"
-        D.Font                  = Enum.Font.GothamMedium
-        D.TextSize              = 12
-        D.TextColor3            = p
-        D.TextXAlignment        = Enum.TextXAlignment.Left
-        D.Parent                = u
+        local D = Instance.new("Frame")
+        D.Size              = UDim2.new(0.01, 0, 1, 0)
+        D.BackgroundColor3  = o
+        D.BorderSizePixel   = 0
+        D.Parent            = B
+        local E = Instance.new("UICorner")
+        E.CornerRadius = UDim.new(1, 0)
+        E.Parent       = D
 
-        local E = Instance.new("TextLabel")
-        E.Size                  = UDim2.new(1, -90, 0, 16)
-        E.Position              = UDim2.new(0, 70, 0, 122)
-        E.BackgroundTransparency = 1
-        E.Text                  = "Loading framework..."
-        E.Font                  = Enum.Font.Gotham
-        E.TextSize              = 12
-        E.TextColor3            = p
-        E.TextXAlignment        = Enum.TextXAlignment.Right
-        E.Parent                = u
+        local F = Instance.new("TextLabel")
+        F.Size                  = UDim2.new(0, 60, 0, 16)
+        F.Position              = UDim2.new(0, 20, 0, 122)
+        F.BackgroundTransparency = 1
+        F.Text                  = "1%"
+        F.Font                  = Enum.Font.GothamMedium
+        F.TextSize              = 12
+        F.TextColor3            = r
+        F.TextXAlignment        = Enum.TextXAlignment.Left
+        F.Parent                = w
 
-        local F = false
+        local G = Instance.new("TextLabel")
+        G.Size                  = UDim2.new(1, -90, 0, 16)
+        G.Position              = UDim2.new(0, 70, 0, 122)
+        G.BackgroundTransparency = 1
+        G.Text                  = "Loading framework..."
+        G.Font                  = Enum.Font.Gotham
+        G.TextSize              = 12
+        G.TextColor3            = r
+        G.TextXAlignment        = Enum.TextXAlignment.Right
+        G.Parent                = w
+
+        local H = false
         task.spawn(function()
-            local G = 2.0
-            local H    = tick()
-            while not F do
-                local I = math.min((tick() - H) / G, 1)
-                D.Text  = math.floor(1 + I * 99 + 0.5) .. "%"
-                B.Size  = UDim2.new(I, 0, 1, 0)
-                if I >= 1 then break end
+            local I = 2.0
+            local J    = tick()
+            while not H do
+                local K = math.min((tick() - J) / I, 1)
+                F.Text  = math.floor(1 + K * 99 + 0.5) .. "%"
+                D.Size  = UDim2.new(K, 0, 1, 0)
+                if K >= 1 then break end
                 task.wait()
             end
-            if not F then
-                E.Text = "Ready"
+            if not H then
+                G.Text = "Ready"
                 task.wait(0.25)
             end
-            local I = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-            for J, K in ipairs({ t, u, B, z }) do
-                k:Create(K, I, { BackgroundTransparency = 1 }):Play()
+            local K = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            for L, M in ipairs({ v, w, D, B }) do
+                m:Create(M, K, { BackgroundTransparency = 1 }):Play()
             end
-            for J, K in ipairs({ x, y, D, E }) do
-                k:Create(K, I, { TextTransparency = 1 }):Play()
+            for L, M in ipairs({ z, A, F, G }) do
+                m:Create(M, K, { TextTransparency = 1 }):Play()
             end
-            k:Create(w, I, { Transparency = 1 }):Play()
+            m:Create(y, K, { Transparency = 1 }):Play()
             task.wait(0.4)
-            r:Destroy()
+            t:Destroy()
         end)
 
-        return function() F = true end
+        return function() H = true end
     end)
-    if j and type(k) == "function" then return k end
+    if l and type(m) == "function" then return m end
     return function() end
 end)()
 
 
 
 
-local k, l = pcall(game.HttpGet, game, h.url)
-if not k or type(l) ~= "string" or #l < 200 then
-    pcall(j)
+local m, n = pcall(game.HttpGet, game, j.url)
+if not m or type(n) ~= "string" or #n < 200 then
+    pcall(l)
     return error("[NameHub] Failed to download script. Check your executor's HTTP permissions.", 0)
 end
 
-local m, n = loadstring(l)
-if not m then
-    pcall(j)
-    return error("[NameHub] Loader compile error: " .. tostring(n), 0)
+local o, p = loadstring(n)
+if not o then
+    pcall(l)
+    return error("[NameHub] Loader compile error: " .. tostring(p), 0)
 end
 
-return m()
+return o()
